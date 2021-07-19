@@ -66,7 +66,7 @@ int ConfigParser::readLine( std::string& line )
 
     checkServiceTags(line);
 
-    return EOK;
+    return 0;
 }
 
 void ConfigParser::readFile()
@@ -74,7 +74,7 @@ void ConfigParser::readFile()
     std::string line;
 
     if ( _config_file.is_open() ) {
-        while ( readLine( line ) == EOK ) {
+        while ( readLine( line ) == 0 ) {
             if ( _begin_filter ) {
                 if ( _begin_sector ) {
                     readSection();
@@ -89,7 +89,7 @@ void ConfigParser::readSection()
     Section section;
     std::string line;
 
-    while ( readLine( line ) == EOK ) {
+    while ( readLine( line ) == 0 ) {
         /*
          * Fill class filtering tags
          */
@@ -175,12 +175,12 @@ int ConfigParser::updateValue( std::string driver, std::string key, std::string 
 
     if ( _config_file.is_open() )
     {
-        while ( readLine( line ) == EOK )
+        while ( readLine( line ) == 0 )
         {
             if ( _begin_sector && ( line.find(driver) != std::string::npos ))
             {
                 _temp_config_file << line << std::endl;
-                while ( readLine( line ) == EOK )
+                while ( readLine( line ) == 0 )
                 {
                     size_t tokenPos = line.find('=');
                     if ( tokenPos != std::string::npos )
@@ -244,7 +244,7 @@ int ConfigParser::updateValue( std::string driver, std::string key, std::string 
         return EACCES;
     }
 
-    return EOK;
+    return 0;
 }
 
 void Section::_showDebugInfo()
@@ -299,7 +299,7 @@ int ConfigParser::writeNewFilter()
 
     _config_file << _startConfigMark << std::endl;
 
-    return EOK;
+    return 0;
 }
 
 int ConfigParser::writeSector( std::string clasifier_name, std::string type, std::vector<int>& classIdx )
@@ -323,7 +323,7 @@ int ConfigParser::writeSector( std::string clasifier_name, std::string type, std
     _config_file << classes << std::endl;
 
     _config_file << _endSectorMark << std::endl;
-    return EOK;
+    return 0;
 }
 
 void ConfigParser::finishNewFilter()

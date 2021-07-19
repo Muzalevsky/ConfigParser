@@ -1,25 +1,37 @@
 #include <config_parser_api.h>
 #include <filterparser.h>
 
-#define CLASS_FILTER_CONFIG_PATH "/data/config/filter.conf"
-#define CORE_CONFIG_PATH         "/data/config/core.conf"
+#define CLASS_FILTER_CONFIG_NAME "filter.conf"
+#define CORE_CONFIG_NAME         "core.conf"
 #define FILTER_CONF_PREFIX       "[filter_config_api]: "
+
+#include <direct.h>
+#include <limits.h>
+#include <iostream>
+
+static std::string get_current_dir()
+{
+    char buff[PATH_MAX];
+    _getcwd( buff, PATH_MAX );
+    std::string current_dir(buff);
+    return current_dir;
+}
 
 static std::string class_filter_get_path_string()
 {
-    std::string filterConfigPath = CLASS_FILTER_CONFIG_PATH;
+    std::string filterConfigPath = get_current_dir() + "/" + CLASS_FILTER_CONFIG_NAME;
     return filterConfigPath;
 }
 
 int class_filter_exists()
 {
-    ConfigParser parser( class_filter_get_path_string(), ios_base::in, false );
+    ConfigParser parser( class_filter_get_path_string(), std::ios_base::in, false );
     return (int)parser.loaded;
 }
 
 std::vector<int> class_filter_read_sector( std::string classifier_name )
 {
-    ConfigParser parser( class_filter_get_path_string(), ios_base::in, false );
+    ConfigParser parser( class_filter_get_path_string(), std::ios_base::in, false );
     parser.readFile();
 
     for( auto it = parser.sections.begin(); it != parser.sections.end(); it++ ) {
@@ -35,19 +47,19 @@ std::vector<int> class_filter_read_sector( std::string classifier_name )
 
 void class_filter_write_header()
 {
-    ConfigParser parser( class_filter_get_path_string(), ios_base::out | ios_base::trunc, false );
+    ConfigParser parser( class_filter_get_path_string(), std::ios_base::out | std::ios_base::trunc, false );
     parser.writeNewFilter();
 }
 
 void class_filter_write_sector( std::string classifier_name, std::string type, std::vector<int> classIndex )
 {
-    ConfigParser parser( class_filter_get_path_string(), ios_base::out | ios_base::app, false );
+    ConfigParser parser( class_filter_get_path_string(), std::ios_base::out | std::ios_base::app, false );
     parser.writeSector( classifier_name, type, classIndex );
 }
 
 void class_filter_write_footer()
 {
-    ConfigParser parser( class_filter_get_path_string(), ios_base::out | ios_base::app, false );
+    ConfigParser parser( class_filter_get_path_string(), std::ios_base::out | std::ios_base::app, false );
     parser.finishNewFilter();
 }
 
@@ -66,7 +78,7 @@ int class_filter_get_classes_data( const char *classifier_name, int *array )
     for ( size_t i = 0; i < indexes.size(); i++ )
         array[i] = indexes[i];
 
-    return EOK;
+    return 0;
 }
 
 /*
@@ -76,13 +88,13 @@ int class_filter_get_classes_data( const char *classifier_name, int *array )
 
 static std::string core_config_get_path_string()
 {
-    std::string filterConfigPath = CORE_CONFIG_PATH;
+    std::string filterConfigPath = get_current_dir() + "/" + CORE_CONFIG_NAME;
     return filterConfigPath;
 }
 
 int core_config_exists()
 {
-    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+    ConfigParser parser( core_config_get_path_string(), std::ios_base::in, true );
     return (int) parser.loaded;
 }
 
@@ -91,7 +103,7 @@ static int config_section_get_value( std::string section_name, std::string key, 
     if ( !out_val )
         return EINVAL;
 
-    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+    ConfigParser parser( core_config_get_path_string(), std::ios_base::in, true );
     parser.readFile();
     std::string optval;
     parser.getValue( section_name, std::string(key), optval );
@@ -100,7 +112,7 @@ static int config_section_get_value( std::string section_name, std::string key, 
 
     if ( !optval.empty() ) {
         sprintf( out_val, "%s", optval.c_str() );
-        return EOK;
+        return 0;
     }
 
     return ENODATA;
@@ -121,7 +133,7 @@ int core_config_set_driver_value( const char *driver_name, const char *key, cons
     if ( !out_val )
         return EINVAL;
 
-    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+    ConfigParser parser( core_config_get_path_string(), std::ios_base::in, true );
     return parser.updateValue(std::string(driver_name), std::string(key), std::string(out_val));
 }
 
