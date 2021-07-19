@@ -19,12 +19,11 @@ class Section {
 public:
     Section() {}
     void _showDebugInfo();
-    void checkServiceOptions(std::string& optname, std::string& optval);
+    void checkServiceOptions( std::string& optname, std::string& optval );
 
     std::string name;
     std::string type;
-    std::vector<int>    classIdx;
-
+    std::vector<int> classIdx;
     std::vector<KeyVal> options;
 };
 
@@ -34,25 +33,23 @@ public:
     ConfigParser(std::string filepath, std::ios_base::openmode mode, bool useCoreConfig );
     ~ConfigParser();
 
-    void                    finishNewFilter();
-    void                    readFile();
-    int                     writeNewFilter();
-    int                     writeSector(std::string clasifier_name, std::string type, std::vector<int>& classIdx );
+    void finishNewFilter();
+    void getValue( std::string section_name, std::string optname, std::string& optval );
+    void readFile();
+    int writeNewFilter();
+    int writeSector(std::string clasifier_name, std::string type, std::vector<int>& classIdx );
+    int updateValue( std::string driver, std::string key, std::string out_val );
 
-    void                    getValue( std::string section_name, std::string optname, std::string& optval );
-    int                     updateValue( std::string driver, std::string key, std::string out_val );
-
-    bool                    loaded;
-    std::vector<Section>    sections;
+    bool loaded;
+    std::vector<Section> sections;
 
 private:
     void checkServiceTags( std::string& line );
-    bool hasLineServiceTag(Section& section, std::string& line);
-
+    bool hasLineServiceTag( Section& section, std::string& line );
+    bool parseClasses( std::string &line, std::string find, std::vector<int> &vector );
+    bool parseValue( std::string &from, std::string find, std::string &to );
     int readLine( std::string& line );
     void readSection();
-    bool parseValue(std::string &from, std::string find, std::string &to );
-    bool parseClasses(std::string &line, std::string find, std::vector<int> &vector);
     void trimSpaces( std::string &str );
 
     bool            _coreMode;

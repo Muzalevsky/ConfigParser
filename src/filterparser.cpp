@@ -6,7 +6,7 @@
 
 //using namespace std;
 
-ConfigParser::ConfigParser(std::string filepath, std::ios_base::openmode mode, bool useCoreConfig = false ) :
+ConfigParser::ConfigParser( std::string filepath, std::ios_base::openmode mode, bool useCoreConfig = false ) :
     _coreMode(useCoreConfig),
     _debug(false),
     _begin_filter(false),
@@ -134,7 +134,7 @@ bool ConfigParser::parseValue( std::string& from, std::string find, std::string&
     return false;
 }
 
-bool ConfigParser::parseClasses(std::string& line, std::string find, std::vector<int>& vector )
+bool ConfigParser::parseClasses( std::string& line, std::string find, std::vector<int>& vector )
 {
     std::size_t found = line.find(find);
     if (found != std::string::npos) {
@@ -164,7 +164,7 @@ void ConfigParser::getValue( std::string section_name, std::string optname, std:
     }
 }
 
-int ConfigParser::updateValue(std::string driver, std::string key, std::string out_val)
+int ConfigParser::updateValue( std::string driver, std::string key, std::string out_val )
 {
     _updateValue = true;
     _config_file.seekg(0, std::ios::beg);
@@ -283,7 +283,7 @@ void ConfigParser::checkServiceTags( std::string& line )
     }
 }
 
-bool ConfigParser::hasLineServiceTag(Section& section, std::string& line)
+bool ConfigParser::hasLineServiceTag( Section& section, std::string& line )
 {
     return ( parseValue( line, std::string("name = "), section.name ) ||
              parseValue( line, std::string("type = "), section.type ) ||
