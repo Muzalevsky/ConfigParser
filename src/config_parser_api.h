@@ -18,7 +18,7 @@ void                class_filter_write_footer();
 extern "C" {
 #endif
 
-bool    class_filter_exists();
+int     class_filter_exists();
 size_t  class_filter_get_classes_size( const char *classifier_name );
 int     class_filter_get_classes_data( const char *classifier_name, int *array );
 

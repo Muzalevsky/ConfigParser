@@ -9,10 +9,10 @@ static std::string class_filter_get_path_string()
     return filterConfigPath;
 }
 
-bool class_filter_exists()
+int class_filter_exists()
 {
     ConfigParser parser( class_filter_get_path_string(), ios_base::in, false );
-    return parser.loaded;
+    return (int)parser.loaded;
 }
 
 std::vector<int> class_filter_read_sector( std::string classifier_name )
