@@ -69,10 +69,12 @@ void ConfigParser::readFile()
 {
     std::string line;
 
-    while ( readLine( line ) == EOK ) {
-        if ( _begin_filter ) {
-            if ( _begin_sector ) {
-                readSection();
+    if ( _config_file.is_open() ) {
+        while ( readLine( line ) == EOK ) {
+            if ( _begin_filter ) {
+                if ( _begin_sector ) {
+                    readSection();
+                }
             }
         }
     }
