@@ -18,6 +18,11 @@ void                class_filter_write_footer();
 extern "C" {
 #endif
 
+int     core_config_exists();
+int     core_config_get_driver_value( const char *driver_name, const char *key, char *out_val, size_t size );
+int     core_config_get_value( const char *key, char *out_val, size_t size );
+
+
 int     class_filter_exists();
 size_t  class_filter_get_classes_size( const char *classifier_name );
 int     class_filter_get_classes_data( const char *classifier_name, int *array );

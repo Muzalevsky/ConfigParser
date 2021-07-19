@@ -23,9 +23,7 @@ std::vector<int> class_filter_read_sector( std::string classifier_name )
     std::vector<int> empty;
 
     for( auto it = parser.sections.begin(); it != parser.sections.end(); it++ ) {
-//        cout << "(*it).name " << (*it).name << " classifier_name " << classifier_name << endl;
         if ( (*it).name == classifier_name ) {
-            cout << "Found " << classifier_name << endl;
             return (*it).classIdx;
         }
     }
@@ -76,17 +74,30 @@ int class_filter_get_classes_data( const char *classifier_name, int *array )
 /*
  * The following section was created for core.conf parsing
  */
-#if 0
+#if 1
 
-static int config_section_get_value( config_parser_t ctx, std::string section_name, std::string key, char *out_val, size_t size )
+static std::string core_config_get_path_string()
 {
-    if ( !out_val || !ctx ) {
+    std::string filterConfigPath = "/" + CORE_CONFIG_PATH;
+    return filterConfigPath;
+}
+
+int core_config_exists()
+{
+    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+    return (int) parser.loaded;
+}
+
+static int config_section_get_value( std::string section_name, std::string key, char *out_val, size_t size )
+{
+    if ( !out_val ) {
         return EINVAL;
     }
 
-    ConfigParser *parser = (ConfigParser*)ctx;
+    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+    parser.readFile();
     std::string optval;
-    parser->getValue( section_name, std::string(key), optval );
+    parser.getValue( section_name, std::string(key), optval );
     if ( optval.size() > size ) {
         return ENOMEM;
     }
@@ -99,44 +110,14 @@ static int config_section_get_value( config_parser_t ctx, std::string section_na
     return ENODATA;
 }
 
-int config_core_init( config_parser_t *ctx )
+int core_config_get_value( const char *key, char *out_val, size_t size )
 {
-    ConfigParser *parser = new ConfigParser( core_config_get_path_string(), ios_base::in, true );
-    if ( parser->loaded ) {
-        parser->readFile();
-        *ctx = parser;
-        return EOK;
-    }
-
-    return EINVAL;
+    return config_section_get_value( std::string("core"), std::string(key), out_val, size );
 }
 
-bool config_core_exists( config_parser_t ctx )
+int core_config_get_driver_value( const char *driver_name, const char *key, char *out_val, size_t size )
 {
-    ConfigParser *parser = (ConfigParser*)ctx;
-    return parser->loaded;
-}
-
-int config_core_get_value( config_parser_t ctx, const char *key, char *out_val, size_t size )
-{
-    return config_section_get_value( ctx, std::string("core"), std::string(key), out_val, size );
-}
-
-int config_driver_get_value( config_parser_t ctx, const char *driver_name, const char *key, char *out_val, size_t size )
-{
-    return config_section_get_value( ctx, std::string(driver_name), std::string(key), out_val, size );
-}
-
-
-void config_core_free( config_parser_t *ctx )
-{
-    if ( ctx ) {
-        ConfigParser *parser = (ConfigParser*)ctx;
-        delete parser;
-        *ctx = NULL;
-    }
+    return config_section_get_value( std::string(driver_name), std::string(key), out_val, size );
 }
 
 #endif
-
-
