@@ -120,4 +120,15 @@ int core_config_get_driver_value( const char *driver_name, const char *key, char
     return config_section_get_value( std::string(driver_name), std::string(key), out_val, size );
 }
 
+int core_config_set_driver_value( const char *driver_name, const char *key, const char *out_val)
+{
+    if ( !out_val ) {
+        return EINVAL;
+    }
+
+    ConfigParser parser( core_config_get_path_string(), ios_base::in, true );
+
+    return parser.updateValue(std::string(driver_name), std::string(key), std::string(out_val));
+}
+
 #endif

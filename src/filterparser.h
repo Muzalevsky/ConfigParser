@@ -6,6 +6,7 @@
  * This is implementation of the class filtration config file parser
  */
 
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -39,6 +40,7 @@ public:
     int                     writeSector(std::string clasifier_name, std::string type, std::vector<int>& classIdx );
 
     void                    getValue( std::string section_name, std::string optname, std::string& optval );
+    int                     updateValue( std::string driver, std::string key, std::string out_val );
 
     bool                    loaded;
     std::vector<Section>    sections;
@@ -57,7 +59,9 @@ private:
     bool            _debug;
     bool            _begin_filter;
     bool            _begin_sector;
+    bool            _updateValue;
     std::fstream    _config_file;
+    std::fstream    _temp_config_file;
 
     std::string     _endConfigMark;
     std::string     _endSectorMark;

@@ -14,6 +14,7 @@ ConfigParser::ConfigParser(std::string filepath, std::ios_base::openmode mode, b
     _filePath(filepath)
 {
     _config_file.open( _filePath, mode );
+    _updateValue = false;
     loaded = _config_file.is_open();
     if ( !loaded ) {
         std::cout << "Failed to open file " << filepath << std::endl;
@@ -43,18 +44,21 @@ int ConfigParser::readLine( std::string& line )
 {
     getline(_config_file, line);
 
-    while ( line.find_first_of('#') != std::string::npos ) {
-        if ( _debug )
-            std::cout << "Comment line: " << line << std::endl;
+    if (!_updateValue)
+    {
+        while ( line.find_first_of('#') != std::string::npos ) {
+            if ( _debug )
+                std::cout << "Comment line: " << line << std::endl;
 
-        getline(_config_file, line);
-    }
+            getline(_config_file, line);
+        }
 
-    while ( line.empty() ) {
-        if ( _debug )
-            std::cout << std::endl;
+        while ( line.empty() ) {
+            if ( _debug )
+                std::cout << std::endl;
 
-        getline(_config_file, line);
+            getline(_config_file, line);
+        }
     }
 
     if ( _config_file.peek() == EOF )
@@ -160,6 +164,89 @@ void ConfigParser::getValue( std::string section_name, std::string optname, std:
     }
 }
 
+int ConfigParser::updateValue(std::string driver, std::string key, std::string out_val)
+{
+    _updateValue = true;
+    _config_file.seekg(0, std::ios::beg);
+    std::string line;
+
+    std::string temp_config = _filePath + ".temp";
+    _temp_config_file.open(temp_config);
+
+    if ( _config_file.is_open() )
+    {
+        while ( readLine( line ) == EOK )
+        {
+            if ( _begin_sector && ( line.find(driver) != std::string::npos ))
+            {
+                _temp_config_file << line << std::endl;
+                while ( readLine( line ) == EOK )
+                {
+                    size_t tokenPos = line.find('=');
+                    if ( tokenPos != std::string::npos )
+                    {
+                        std::string optname = line.substr(0, tokenPos);
+                        std::string optval = line.substr( tokenPos + 1 );
+
+                        optname.erase(std::remove_if(optname.begin(), optname.end(), isspace), optname.end());
+                        optval.erase(std::remove_if(optval.begin(), optval.end(), isspace), optval.end());
+
+                        if ((optname == key))
+                        {
+                            //change value
+                            size_t index = line.find('=');
+                            if (index != std::string::npos)
+                            {
+                                line = line.substr(0, index) + "= " + out_val;
+                            }
+                            else
+                            {
+                                if ( _debug )
+                                {
+                                    std::cout << "Could not find '=' symbol in string " << std::endl;
+                                }
+                                _updateValue = false;
+                                _temp_config_file.close();
+                                remove(temp_config.c_str());
+                                return ENODATA;
+                            }
+                        }
+                    }
+                    _temp_config_file << line << std::endl;
+                    if ( !_begin_sector ) break;
+                }
+            }
+            else
+            {
+                _temp_config_file << line << std::endl;
+            }
+        }
+        _temp_config_file << line << std::endl;
+    }
+    _updateValue = false;
+    _temp_config_file.close();
+
+    if (remove(_filePath.c_str()) != 0)
+    {
+        if ( _debug )
+        {
+            std::cout << "Unable to remove old config " << std::endl;
+        }
+        return EACCES;
+    }
+
+    if (rename(temp_config.c_str(), _filePath.c_str()) != 0)
+    {
+        if ( _debug )
+        {
+            std::cout << "Unable to rename new config " << std::endl;
+        }
+        return EACCES;
+    }
+
+    return EOK;
+}
+
 void Section::_showDebugInfo()
 {
     std::cout << "Name " << name << std::endl << "Type " << type << std::endl << "Include: ";
@@ -211,6 +298,8 @@ int ConfigParser::writeNewFilter()
     _config_file << "# Use filter-generator instead." << std::endl;
 
     _config_file << _startConfigMark << std::endl;
+
+    return EOK;
 }
 
 int ConfigParser::writeSector( std::string clasifier_name, std::string type, std::vector<int>& classIdx )
